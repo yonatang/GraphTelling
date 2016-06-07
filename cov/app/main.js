@@ -40,8 +40,12 @@ define(function (require) {
         var data_1d=datas[0],
             map=datas[1],
             data_histogram=datas[2];
-        scatter(data_1d, '#view1');
-        s2b(map, data_histogram);
+
+        
+        var ctx=scatter.generateContext(data_1d);
+        scatter.draw('#view1', ctx);
+        // scatter.draw(data_1d, '#view1');
+        s2b(ctx, map, data_histogram);
         // console.log('datas',datas   );
     });
 
@@ -56,7 +60,8 @@ define(function (require) {
         console.log('histograms');
         if (err){throw err ;}
         console.log('bars');
-        bars(data, '#view2');
-
+        var ctx=bars.generateContext(data);
+        bars.draw('#view2',ctx);
+        // bars(data, '#view2');
     });
 });

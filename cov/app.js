@@ -6,8 +6,8 @@
 requirejs.config({
     baseUrl: './app',
     paths: {
-        d3: '../../common/d3.min',
-        domReady : '../../common/domready',
+        d3: '../lib/d3.min',
+        domReady : '../lib/domready',
     }
 });
 
