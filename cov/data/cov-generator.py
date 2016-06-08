@@ -23,7 +23,8 @@ def generate_1d_data(n):
     for i in range(0,n):
 
         x=random.gauss(0,1)
-        data_1d.append({"id": str(i), "x": x, "y": 0})
+        y=random.gauss(0,0.1)
+        data_1d.append({"id": str(i), "x": x, "y": y})
         #
         #
         #
@@ -63,4 +64,4 @@ def generate_1d_data(n):
 
 
 
-generate_1d_data(300)
+generate_1d_data(500)
