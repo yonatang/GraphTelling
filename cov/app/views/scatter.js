@@ -45,7 +45,7 @@ define(['d3'],function(d3) {
             .enter().append("circle")
             .attr("class", "dot")
             .style("fill", "steelblue")
-            .attr("r", 1)
+            .attr("r", 2)
             .attr("cx", function (d) { return x(d.x); })
             .attr("cy", function (d) { return y(d.y); });
 

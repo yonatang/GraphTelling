@@ -1,6 +1,6 @@
 define(['d3', '../views/bars'], function (d3, bars) {
 
-    return function (ctx, map, newData) {
+    return function (ctx, map, newData, callback) {
         var map = JSON.parse(JSON.stringify(map));
         var mapByFrom = {},
             newDataById = {},
@@ -48,11 +48,14 @@ define(['d3', '../views/bars'], function (d3, bars) {
             ctx.svg.selectAll('.y.axis').remove();
             bars.draw('#view1', new_ctx);
             console.log('all done');
+            if (callback){
+                callback(new_ctx);
+            }
         };
 
         var blockHeight = new_y(0) - new_y(1);
         var n = 0;
-        var tickDuration = 1500 / map.length;
+        var tickDuration = 2500 / map.length;
         d3.selectAll('.dot')
             .transition()
             .delay(500)

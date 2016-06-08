@@ -33,7 +33,19 @@ var color = d3.scale.ordinal()
     .range(["blue", "yellow", "green", "cyan", "red"])
     .domain(AGES);
 
+function compositeKeyFunction(props) {
+    if (typeof props == 'string') {
+        props = [props];
+    }
+    return function func(d) {
+        vals = [];
 
+        props.forEach(function (prop) {
+            vals.push(d[prop]);
+        });
+        return vals.join('||');
+    }
+}
 function sumRollupFunction(props) {
     return function func(row) {
         var result = {};
@@ -54,6 +66,7 @@ function sumRollupFunction(props) {
     };
 }
 function getAgesByYear(theData){
+    console.log(theData);
     var dataByDecisionAge = d3.nest().key(function (d) {return d.decision})
         .key(function (d) {return d.age;})
         .rollup(sumRollupFunction(['age', 'decision']))
@@ -163,6 +176,23 @@ function drawByAge(agesByYearTable){
         .text(function (d) { return d;});
 }
 
+function getRejectionByAgeAndSex(theData){
+    var entries = d3.nest()
+        .key(compositeKeyFunction('decision'))
+        .key(compositeKeyFunction('age'))
+        // .key(compositeKeyFunction(['age','decision']))//function(d){return d.age+'||'+d.decision; })
+        //     // {age:d.age, decision:d.decision}})
+        .rollup(sumRollupFunction(['age', 'decision']))
+        .entries(theData);
+    // _log('entries');
+    // _log(entries);
+    entries=d3.map(entries,compositeKeyFunction('key'));
+    // _log(entries);
+    return entries;
+    // window.entries=entries;
+
+}
+
 _log = function(obj){
     console.log(JSON.parse(JSON.stringify(obj)));
 };
@@ -219,6 +249,15 @@ function drawRejectionsByAgePerencent(data){
         .call(yAxis);
 }
 
+function drawCompereBySexRejection(data){
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+}
+
 d3.tsv("data/norm/migr_asydcfsta2-small.tsv", function (error, data) {
     console.log('loaded');
     if (error) throw error;
@@ -241,6 +280,8 @@ d3.tsv("data/norm/migr_asydcfsta2-small.tsv", function (error, data) {
 
 
     var agesByYearTable = getAgesByYear(theData);
+    console.log(agesByYearTable);
+    getRejectionByAgeAndSex(theData);
     drawByAge(agesByYearTable);
     drawRejectionsByAgePerencent(agesByYearTable);
 });

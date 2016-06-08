@@ -11,10 +11,12 @@ define(function (require) {
     var bars = require('views/bars'),
         scatter = require('views/scatter');
 
-    var s2b = require('trans/scatter_to_bars');
+    var s2b = require('trans/scatter_to_bars'),
+        b2s = require('trans/bars_to_scatter');
 
     function jsons(files, callback) {
         var datas = [];
+
         function jsonI(i) {
             return function (err, data) {
                 if (err) {
@@ -23,45 +25,34 @@ define(function (require) {
                 if (!!data) {
                     datas.push(data);
                 }
-                if (i+1 == files.length) {
+                if (i + 1 == files.length) {
                     return callback(err, datas);
                 }
-                d3.json(files[i+1], jsonI(i + 1));
+                d3.json(files[i + 1], jsonI(i + 1));
             }
         }
+
         d3.json(files[0], jsonI(0));
     }
 
-    console.log('dd1');
-    jsons(['data/data_1d.json','data/map_1d_histogram.json', 'data/data_histogram.json'], function(err,datas){
+    jsons(['data/data_1d.json', 'data/map_1d_histogram.json', 'data/data_histogram.json'], function (err, datas) {
         if (err) {
             throw err;
         }
-        var data_1d=datas[0],
-            map=datas[1],
-            data_histogram=datas[2];
+        var data_1d = datas[0],
+            map = datas[1],
+            data_histogram = datas[2];
 
-        
-        var ctx=scatter.generateContext(data_1d);
-        scatter.draw('#view1', ctx);
-        // scatter.draw(data_1d, '#view1');
-        s2b(ctx, map, data_histogram);
-        // console.log('datas',datas   );
+        var ctx = bars.generateContext(data_histogram);
+        bars.draw('#view1', ctx);
+        function repeat(ctx) {
+            b2s(ctx, map, data_1d, function (ctx) {
+                s2b(ctx, map, data_histogram, function (ctx) {
+                    repeat(ctx);
+                })
+            })
+        };
+        repeat(ctx);
     });
 
-    // d3.json('data/data_1d.json', function (err, data) {
-    //
-    //
-    //    //
-    //
-    // });
-    console.log('dd');
-    d3.json('data/data_histogram.json', function(err, data){
-        console.log('histograms');
-        if (err){throw err ;}
-        console.log('bars');
-        var ctx=bars.generateContext(data);
-        bars.draw('#view2',ctx);
-        // bars(data, '#view2');
-    });
 });
