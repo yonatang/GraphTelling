@@ -4,10 +4,10 @@
 // except for 'app' ones, which are in a sibling
 // directory.
 requirejs.config({
-    baseUrl: './app',
+    baseUrl: 'scripts',
     paths: {
-        d3: '../lib/d3.min',
-        domReady : '../lib/domready',
+        d3: 'lib/d3.min',
+        domReady : 'lib/domready'
     }
 });
 
