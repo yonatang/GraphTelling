@@ -1,38 +1,38 @@
 define(function (require) {
-    // Load any app-specific modules
-    // with a relative require call,
-    // like:
-    // var messages = require('./messages');
 
-    // Load library/vendor modules using
-    // full IDs, like:
-    var d3 = require('d3');
-
+    var d3=require('d3');
+    var s2b_t = require('trans/bars2scatter');
     var bars = require('views/bars'),
         scatter = require('views/scatter');
-
-    var s2b = require('trans/scatter_to_bars'),
-        b2s = require('trans/bars_to_scatter');
 
     function jsons(files, callback) {
         var datas = [];
 
-        function jsonI(i) {
+        var done = false;
+        var n=0;
+        function _callback(i) {
             return function (err, data) {
+                n++;
                 if (err) {
-                    return callback(err);
+                    if (!done) {
+                        done = true;
+                        return callback(err);
+                    }
+                    return;
                 }
                 if (!!data) {
-                    datas.push(data);
+                    datas[i]=data;
                 }
-                if (i + 1 == files.length) {
-                    return callback(err, datas);
+                if (n == files.length) {
+                    if (!done) {
+                        return callback(null, datas);
+                    }
                 }
-                d3.json(files[i + 1], jsonI(i + 1));
             }
         }
-
-        d3.json(files[0], jsonI(0));
+        files.forEach(function(file,i){
+            d3.json(file, _callback(i));
+        });
     }
 
     jsons(['data/data_1d.json', 'data/map_1d_histogram.json', 'data/data_histogram.json'], function (err, datas) {
@@ -42,6 +42,9 @@ define(function (require) {
         var data_1d = datas[0],
             map = datas[1],
             data_histogram = datas[2];
+
+        var b2s=s2b_t.b2s,
+            s2b=s2b_t.s2b;
 
         var ctx = bars.generateContext(data_histogram);
         bars.draw('#view1', ctx);
