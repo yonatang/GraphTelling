@@ -49,16 +49,82 @@ define(function (require) {
 
         var ctx = stackedBars.generateContext(data_graph1);
         stackedBars.draw('#view1', ctx);
-        sb2sb.sb2sb(ctx, map_g1_to_g2, data_graph2, {}, function(ctx){
-            sb2sb.sb2sb(ctx, map_g2_to_g3, data_graph3, {}, function(ctx){
-                sb2sb.sb2sb(ctx, map_g3_to_g4, data_graph4, {firstX:false}, function(ctx) {
-                    sb2sb.sb2sb(ctx, map_g4_to_g1, data_graph1, {}, function(ctx){
 
-                    });
-                });
 
-            });
-        });
+        function showStepMessage() {
+            $("#spn_message").text('Step ' + (step + 1));
+        }
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function progress(forward) {
+            $(".progress-button").attr("disabled", true);
+
+            $('#spn_message').text('Going from step ' + (step + 1) + ' to ' +
+                (mod(forward ? (step + 1) : (step - 1), 4) + 1));
+
+            function callback(_ctx) {
+                step = mod(forward ? (step + 1) : (step - 1), 4);
+                ctx = _ctx;
+
+                $(".progress-button").attr("disabled", false);
+                showStepMessage()
+            }
+
+            var map,
+                data;
+            switch (step) {
+                case 0:
+                    if (forward) {
+                        map = map_g1_to_g2;
+                        data = data_graph2;
+                    } else {
+                        map = map_g4_to_g1;
+                        data = data_graph4;
+                    }
+                    break;
+                case 1:
+                    if (forward) {
+                        map = map_g2_to_g3;
+                        data = data_graph3;
+                    } else {
+                        map = map_g1_to_g2;
+                        data = data_graph1;
+                    }
+                    break;
+                case 2:
+                    if (forward) {
+                        map = map_g3_to_g4;
+                        data = data_graph4;
+                    } else {
+                        map = map_g2_to_g3;
+                        data = data_graph2;
+                    }
+                    break;
+                case 3:
+                    if (forward) {
+                        map = map_g4_to_g1;
+                        data = data_graph1;
+                    } else {
+                        map = map_g3_to_g4;
+                        data = data_graph3;
+                    }
+                    break;
+            }
+            if (forward) {
+                sb2sb.transform(ctx, map, data, {}, callback);
+            } else {
+                sb2sb.reverse(ctx, map, data, {}, callback);
+            }
+        }
+
+        var step=0;
+        showStepMessage();
+        $('#btn_next').click(function () { progress(true); });
+        $('#btn_back').click(function () { progress(false); });
+
 
     });
 

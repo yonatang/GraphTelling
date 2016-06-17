@@ -147,8 +147,22 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             });
 
     }
-
-    return {sb2sb : sb2sb};
+    function reverseMap(map){
+        var rMap=utils.clone(map);
+        rMap.forEach(function(item){
+            var to=item.from;
+            item.from=item.to;
+            item.to=to;
+        });
+        return rMap;
+    }
+    function reverse(ctx, mapBarsToBars, newData, opts, callback){
+        sb2sb(ctx, reverseMap(mapBarsToBars), newData, opts, callback);
+    }
+    return {
+        transform: sb2sb,
+        reverse: reverse
+    };
 
 
 });

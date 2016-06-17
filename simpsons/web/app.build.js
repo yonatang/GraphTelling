@@ -6,6 +6,6 @@
     include: ['lib/require'],
     paths: {
         d3: 'lib/d3.min',
-        require: 'lib/require',
+        require: 'lib/require'
     }
 })
