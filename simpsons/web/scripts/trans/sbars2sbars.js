@@ -115,26 +115,60 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         var n=0;
         var anim=tmpBars
             .transition()
-            .delay(1000)
+            // .delay(1000)
             .attr("y", function(d) { return y(d.tmpY1)-2*d.tmpYOrder; })
             .style('stroke', 'black')
             .style('fill-opacity', "0.4")
             .transition()
-            .delay(1500)
+            .delay(500)
             .duration(1000);
 
-        if (opts.firstX){
-            anim=anim.attr("width", new_x.rangeBand())
-                .attr("x", function (d) { return new_x(d.x); })
-                .transition()
-                .attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
-                .attr("y", function (d) { return new_y(d.y1); })
+
+        function xAnim(anim) {
+            var x_needed = false;
+            if (x.rangeBand() != new_x.rangeBand()) {
+                x_needed = true;
+            }
+            transitElements.forEach(function (d) {
+                if (x(d.oldX) != new_x(d.x)) {
+                    x_needed = true;
+                }
+            });
+            if (x_needed) {
+                anim
+                    .attr("width", new_x.rangeBand())
+                    .attr("x", function (d) { return new_x(d.x); });
+            }
+            return x_needed;
+        }
+        function yAnim(anim){
+            var y_needed = false;
+            transitElements.forEach(function (d) {
+                if (new_y(d.y0) - new_y(d.y1) != y(d.tmpY0) - y(d.tmpY1) ||
+                    new_y(d.y1) != y(d.tmpY1)) {
+                    y_needed = true;
+                }
+            });
+            if (y_needed) {
+                anim
+                    .attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
+                    .attr("y", function (d) { return new_y(d.y1); })
+            }
+            return y_needed;
+        }
+
+        if (opts.firstX) {
+            var needed = xAnim(anim);
+            if (needed) {
+                anim = anim.transition();
+            }
+            yAnim(anim);
         } else {
-            anim=anim.attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
-                .attr("y", function (d) { return new_y(d.y1); })
-                .transition()
-                .attr("width", new_x.rangeBand())
-                .attr("x", function (d) { return new_x(d.x); })
+            var needed = yAnim(anim);
+            if (needed) {
+                anim = anim.transition();
+            }
+            xAnim(anim);
         }
 
         anim
