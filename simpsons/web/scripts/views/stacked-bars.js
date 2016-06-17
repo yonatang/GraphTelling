@@ -85,8 +85,14 @@ define(['d3'], function (d3) {
 
     }
 
+    function hideAxises(ctx){
+        ctx.svg.selectAll('.x.axis').remove();
+        ctx.svg.selectAll('.y.axis').remove();
+    }
+
     return {
         draw: draw,
+        hideAxises: hideAxises,
         generateContext :  generateContext
     };
 });

@@ -66,8 +66,6 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
 
     function endAnimationCb(oldCtx, newCtx, callback) {
         d3.selectAll('.tmp').remove();
-        oldCtx.svg.selectAll('.x.axis').remove();
-        oldCtx.svg.selectAll('.y.axis').remove();
         stackedBars.draw('#view1', newCtx);
         if (callback) {
             callback(newCtx);
@@ -98,6 +96,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         var new_x=new_ctx.scale.x,
             new_y=new_ctx.scale.y;
 
+
         var tmpBars= svg.selectAll("tmpBar")
           .data(transitElements)
             .enter().append("rect")
@@ -123,6 +122,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             .delay(500)
             .duration(1000);
 
+        stackedBars.hideAxises(ctx);
 
         function xAnim(anim) {
             var x_needed = false;
