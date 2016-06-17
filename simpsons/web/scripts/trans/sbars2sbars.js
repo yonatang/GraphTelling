@@ -54,9 +54,6 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
                 d.tmpYOrder=tmpXOrderMap[d.tmpXOrder];
                 tmpXOrderMap[d.tmpXOrder]++;
                 y0=d.tmpY1;
-                // d.partHeight=oldHeight * (newHeight / mapping.sum);
-                // d.partY = y;
-                // y-=d.partHeight;
                 transitElements.push(d);
             });
         });
@@ -77,8 +74,14 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         }
     }
 
-    //accepted == 'e377c2'
-    function sb2sb(ctx, mapBarsToBars, newData, callback) {
+    function sb2sb(ctx, mapBarsToBars, newData, opts, callback) {
+        var defaults={
+            firstX : true
+        };
+        if (opts.firstX==null || opts.firstX==undefined){
+            opts.firstX=defaults.firstX;
+        }
+
         var oldData = ctx.data;
         var mapData = processMap(oldData, newData, mapBarsToBars);
         var mapByOldBar = mapData.mapByOldBar,
@@ -110,20 +113,32 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         svg.selectAll('.bar').remove();
 
         var n=0;
-        tmpBars
+        var anim=tmpBars
             .transition()
             .delay(1000)
             .attr("y", function(d) { return y(d.tmpY1)-2*d.tmpYOrder; })
+            .style('stroke', 'black')
+            .style('fill-opacity', "0.4")
             .transition()
             .delay(1500)
-            .duration(1000)
-            .attr("width", new_x.rangeBand())
-            .attr("x", function (d) { return new_x(d.x); })
-            .transition()
-            .attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
-            .attr("y", function (d) { return new_y(d.y1); })
+            .duration(1000);
 
+        if (opts.firstX){
+            anim=anim.attr("width", new_x.rangeBand())
+                .attr("x", function (d) { return new_x(d.x); })
+                .transition()
+                .attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
+                .attr("y", function (d) { return new_y(d.y1); })
+        } else {
+            anim=anim.attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
+                .attr("y", function (d) { return new_y(d.y1); })
+                .transition()
+                .attr("width", new_x.rangeBand())
+                .attr("x", function (d) { return new_x(d.x); })
+        }
 
+        anim
+            .style('fill-opacity', "1")
             .each(function() { ++n; })
             .each('end', function(){
                 if (!--n){

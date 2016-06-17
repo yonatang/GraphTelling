@@ -82,6 +82,7 @@ define(['d3'], function (d3) {
             .attr("width", x.rangeBand())
             .attr("y", function (d) { return y(d.y1); })
              .attr("height", function (d) { return y(d.y0) - y(d.y1); });
+
     }
 
     return {

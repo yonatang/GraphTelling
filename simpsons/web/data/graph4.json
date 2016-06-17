@@ -1,0 +1,6 @@
+[
+  {"xOrder":0,"x":"Women", "y0": 0, "y1": 339, "color":"#e377c2", "id":"0"},
+  {"xOrder":0,"x":"Women", "y0": 339, "y1": 1045, "color":"#c7c7c7", "id":"1"},
+  {"xOrder":1,"x":"Men", "y0": 0, "y1": 418, "color":"#1f77b4", "id":"2"},
+  {"xOrder":1,"x":"Men", "y0": 418, "y1": 943, "color":"#c7c7c7", "id":"3"}
+]
