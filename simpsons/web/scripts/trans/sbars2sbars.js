@@ -38,7 +38,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         forEach(mapByOldBar, function(mapping){
             var oldDataPoint = mapping.from;
             var oldHeight = oldDataPoint.y1 - oldDataPoint.y0;
-            var y0=oldDataPoint.y0;
+            var y0 = oldDataPoint.y0;
             forEach(mapping.to, function(d, i){
                 var newHeight = d.y1 - d.y0;
                 d.oldX = oldDataPoint.x;
@@ -72,12 +72,11 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
     }
 
     function sb2sb(ctx, mapBarsToBars, newData, opts, callback) {
-        var defaults={
-            firstX : true
+        var defaults = {
+            firstX: true,
+            duration: 1000
         };
-        if (opts.firstX==null || opts.firstX==undefined){
-            opts.firstX=defaults.firstX;
-        }
+        var opts = $.extend({}, defaults, opts);
 
         var oldData = ctx.data;
         var mapData = processMap(oldData, newData, mapBarsToBars);
@@ -118,7 +117,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             .style('fill-opacity', "0.4")
             .transition()
             .delay(500)
-            .duration(1000);
+            .duration(opts.duration);
 
         stackedBars.hideAxises(ctx);
 

@@ -72,9 +72,11 @@ define(function (require) {
                 $(".progress-button").attr("disabled", false);
                 showStepMessage()
             }
+            var duration=$("#input_duration").val();
 
             var map,
-                data;
+                data,
+                opts = { duration:duration};
             switch (step) {
                 case 0:
                     if (forward) {
@@ -92,12 +94,14 @@ define(function (require) {
                     } else {
                         map = map_g1_to_g2;
                         data = data_graph1;
+                        opts.firstX=false;
                     }
                     break;
                 case 2:
                     if (forward) {
                         map = map_g3_to_g4;
                         data = data_graph4;
+                        opts.firstX=false;
                     } else {
                         map = map_g2_to_g3;
                         data = data_graph2;
@@ -114,9 +118,9 @@ define(function (require) {
                     break;
             }
             if (forward) {
-                sb2sb.transform(ctx, map, data, {}, callback);
+                sb2sb.transform(ctx, map, data, opts, callback);
             } else {
-                sb2sb.reverse(ctx, map, data, {}, callback);
+                sb2sb.reverse(ctx, map, data, opts, callback);
             }
         }
 
