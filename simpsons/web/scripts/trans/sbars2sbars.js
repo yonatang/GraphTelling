@@ -4,7 +4,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
     var forEach = utils.forEach;
 
     function processMap(oldData, newData, mapBarsToBars) {
-        var map = JSON.parse(JSON.stringify(mapBarsToBars));
+        var map = clone(mapBarsToBars);
         var mapByOldBar = {},
             mapByNewBar = {},
             oldDataById = {},
