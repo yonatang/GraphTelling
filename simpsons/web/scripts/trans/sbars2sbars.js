@@ -27,36 +27,60 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             mapByOldBar[m.from].to.push(newDataPoint);
             mapByOldBar[m.from].sum += newDataPoint.y1 - newDataPoint.y0;
             if (!mapByNewBar[m.to]) {
-                mapByNewBar[m.to] = {from: []}
+                mapByNewBar[m.to] = {to: newDataPoint, from: [], sum: 0}
             }
             mapByNewBar[m.to].from.push(oldDataPoint);
+            mapByNewBar[m.to].sum += oldDataPoint.y1 - oldDataPoint.y0;
         });
 
         var transitElements = [];
         var tmpXOrderMap = {};
 
-        forEach(mapByOldBar, function(mapping){
-            var oldDataPoint = mapping.from;
-            var oldHeight = oldDataPoint.y1 - oldDataPoint.y0;
-            var y0 = oldDataPoint.y0;
-            forEach(mapping.to, function(d, i){
-                var newHeight = d.y1 - d.y0;
-                d.oldX = oldDataPoint.x;
-                d.oldHeight = oldHeight;
-                d.tmpY0 = y0;
-                d.tmpY1 = y0 + oldHeight * (newHeight / mapping.sum);
-                d.tmpX = oldDataPoint.x;
-                d.tmpXOrder = oldDataPoint.xOrder;
-                if (!tmpXOrderMap[d.tmpXOrder]) {
-                    tmpXOrderMap[d.tmpXOrder] = 0;
+        var destY0s = {};
+        forEach(mapByOldBar, function(mapping) {
+            var parentOldDataPoint = mapping.from;
+            var parentOldHeight = parentOldDataPoint.y1 - parentOldDataPoint.y0;
+            var srcY0 = parentOldDataPoint.y0;
+
+            forEach(mapping.to, function (parentNewDataPoint) {
+                var oldPartsSum = mapping.sum;
+
+                var parentNewHeight = parentNewDataPoint.y1 - parentNewDataPoint.y0;
+                var transitObj = {};
+                transitObj.parentOldDataPoint = parentOldDataPoint;
+                transitObj.parentNewDataPoint = parentNewDataPoint;
+
+                // generate the source properties of the transition object
+                transitObj.srcY0 = srcY0;
+                transitObj.srcY1 = srcY0 + parentOldHeight * (parentNewHeight / oldPartsSum);
+                transitObj.srcX = parentOldDataPoint.x;
+                transitObj.srcId = parentOldDataPoint.id;
+                transitObj.srcXOrder = parentOldDataPoint.xOrder;
+                if (!tmpXOrderMap[transitObj.srcXOrder]) {
+                    tmpXOrderMap[transitObj.srcXOrder] = 0;
                 }
-                d.tmpYOrder = tmpXOrderMap[d.tmpXOrder];
-                tmpXOrderMap[d.tmpXOrder]++;
-                y0 = d.tmpY1;
-                transitElements.push(d);
-            });
+                transitObj.srcYOrder = tmpXOrderMap[transitObj.srcXOrder];
+                transitObj.srcColor = parentOldDataPoint.color;
+                tmpXOrderMap[transitObj.srcXOrder]++;
+                srcY0 = transitObj.srcY1;
+
+                var newPartsSum = mapByNewBar[parentNewDataPoint.id].sum;
+
+                if (!destY0s[parentNewDataPoint.id]) {
+                    destY0s[parentNewDataPoint.id]=parentNewDataPoint.y0;
+                }
+
+                //generate the destination properties of the transition object
+                transitObj.destId = parentNewDataPoint.id;
+                transitObj.destY0 = destY0s[parentNewDataPoint.id];
+                transitObj.destY1 = transitObj.destY0 + parentOldHeight * (parentNewHeight/newPartsSum);
+                transitObj.destX = parentNewDataPoint.x;
+                transitObj.destColor = parentNewDataPoint.color;
+                destY0s[parentNewDataPoint.id] = transitObj.destY1;
+                transitElements.push(transitObj);
+            })
         });
-        
+
         return {
             transitElements : transitElements,
             newDataById : newDataById, oldDataById : oldDataById,
@@ -100,11 +124,11 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             .enter().append("rect")
 
             .attr("class", "tmp")
-            .style('stroke',function(d) { return d.color; })
-            .style("fill", function(d) { return d.color; })
-            .attr("x", function (d) { return x(d.oldX); })
-            .attr("y", function(d) { return y(d.tmpY1); })
-            .attr("height", function(d) { return y(d.tmpY0) - y(d.tmpY1); })
+            .style('stroke',function(d) { return d.srcColor; })
+            .style("fill", function(d) { return d.srcColor; })
+            .attr("x", function (d) { return x(d.srcX); })
+            .attr("y", function(d) { return y(d.srcY1); })
+            .attr("height", function(d) { return y(d.srcY0) - y(d.srcY1); })
             .attr("width", x.rangeBand());
 
         svg.selectAll('.bar').remove();
@@ -112,7 +136,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         var n=0;
         var anim=tmpBars
             .transition()
-            .attr("y", function(d) { return y(d.tmpY1) - 2 * d.tmpYOrder; })
+            .attr("y", function(d) { return y(d.srcY1) - 2 * d.srcYOrder; })
             .style('stroke', 'black')
             .style('fill-opacity', "0.4")
             .transition()
@@ -127,29 +151,29 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
                 x_needed = true;
             }
             transitElements.forEach(function (d) {
-                if (x(d.oldX) != new_x(d.x)) {
+                if (x(d.srcX) != new_x(d.destX)) {
                     x_needed = true;
                 }
             });
             if (x_needed) {
                 anim
                     .attr("width", new_x.rangeBand())
-                    .attr("x", function (d) { return new_x(d.x); });
+                    .attr("x", function (d) { return new_x(d.destX); });
             }
             return x_needed;
         }
         function yAnim(anim){
             var y_needed = false;
             transitElements.forEach(function (d) {
-                if (new_y(d.y0) - new_y(d.y1) != y(d.tmpY0) - y(d.tmpY1) ||
-                    new_y(d.y1) != y(d.tmpY1)) {
+                if (new_y(d.destY0) - new_y(d.destY1) != y(d.srcY0) - y(d.srcY1) ||
+                    new_y(d.destY1) != y(d.srcY1)) {
                     y_needed = true;
                 }
             });
             if (y_needed) {
                 anim
-                    .attr("height", function (d) { return new_y(d.y0) - new_y(d.y1); })
-                    .attr("y", function (d) { return new_y(d.y1); })
+                    .attr("height", function (d) { return new_y(d.destY0) - new_y(d.destY1); })
+                    .attr("y", function (d) { return new_y(d.destY1); });
             }
             return y_needed;
         }
@@ -173,7 +197,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             .each(function() { ++n; })
             .each('end', function(){
                 if (!--n){
-                    endAnimationCb(ctx, new_ctx, callback);
+                    setTimeout(function(){endAnimationCb(ctx, new_ctx, callback);},200);
                 }
             });
 
@@ -194,6 +218,4 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         transform: sb2sb,
         reverse: reverse
     };
-
-
 });

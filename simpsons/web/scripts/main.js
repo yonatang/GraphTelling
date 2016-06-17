@@ -47,7 +47,10 @@ define(function (require) {
             map_g3_to_g4 = datas[6],
             map_g4_to_g1 = datas[7];
 
-        var ctx = stackedBars.generateContext(data_graph1);
+        var init_data=data_graph1,
+            step = 0;
+
+        var ctx = stackedBars.generateContext(init_data);
         stackedBars.draw('#view1', ctx);
 
 
@@ -124,7 +127,6 @@ define(function (require) {
             }
         }
 
-        var step=0;
         showStepMessage();
         $('#btn_next').click(function () { progress(true); });
         $('#btn_back').click(function () { progress(false); });
