@@ -16,19 +16,18 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         newData.forEach(function (dataPoint) {
             newDataById[dataPoint.id] = dataPoint;
         });
-        var map_array = [];
         map.forEach(function (m) {
-            if (!mapByOldBar[m.from]){
-                mapByOldBar[m.from]={to:[], sum: 0}
+            if (!mapByOldBar[m.from]) {
+                mapByOldBar[m.from] = {to: [], sum: 0}
             }
             var newDataPoint = clone(newDataById[m.to]);
             var oldDataPoint = clone(oldDataById[m.from]);
 
-            mapByOldBar[m.from].from=oldDataPoint;
+            mapByOldBar[m.from].from = oldDataPoint;
             mapByOldBar[m.from].to.push(newDataPoint);
-            mapByOldBar[m.from].sum+=newDataPoint.y1 - newDataPoint.y0;
+            mapByOldBar[m.from].sum += newDataPoint.y1 - newDataPoint.y0;
             if (!mapByNewBar[m.to]) {
-                mapByNewBar[m.to]={from:[]}
+                mapByNewBar[m.to] = {from: []}
             }
             mapByNewBar[m.to].from.push(oldDataPoint);
         });
@@ -44,16 +43,16 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
                 var newHeight = d.y1 - d.y0;
                 d.oldX = oldDataPoint.x;
                 d.oldHeight = oldHeight;
-                d.tmpY0=y0;
-                d.tmpY1=y0+oldHeight * (newHeight / mapping.sum);
-                d.tmpX=oldDataPoint.x;
-                d.tmpXOrder=oldDataPoint.xOrder;
+                d.tmpY0 = y0;
+                d.tmpY1 = y0 + oldHeight * (newHeight / mapping.sum);
+                d.tmpX = oldDataPoint.x;
+                d.tmpXOrder = oldDataPoint.xOrder;
                 if (!tmpXOrderMap[d.tmpXOrder]) {
-                    tmpXOrderMap[d.tmpXOrder]=0;
+                    tmpXOrderMap[d.tmpXOrder] = 0;
                 }
-                d.tmpYOrder=tmpXOrderMap[d.tmpXOrder];
+                d.tmpYOrder = tmpXOrderMap[d.tmpXOrder];
                 tmpXOrderMap[d.tmpXOrder]++;
-                y0=d.tmpY1;
+                y0 = d.tmpY1;
                 transitElements.push(d);
             });
         });
@@ -106,7 +105,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
             .style("fill", function(d) { return d.color; })
             .attr("x", function (d) { return x(d.oldX); })
             .attr("y", function(d) { return y(d.tmpY1); })
-            .attr("height", function(d) { return y(d.tmpY0)-y(d.tmpY1); })
+            .attr("height", function(d) { return y(d.tmpY0) - y(d.tmpY1); })
             .attr("width", x.rangeBand());
 
         svg.selectAll('.bar').remove();
@@ -114,8 +113,7 @@ define(['d3', 'utils', '../views/stacked-bars'], function (d3, utils, stackedBar
         var n=0;
         var anim=tmpBars
             .transition()
-            // .delay(1000)
-            .attr("y", function(d) { return y(d.tmpY1)-2*d.tmpYOrder; })
+            .attr("y", function(d) { return y(d.tmpY1) - 2 * d.tmpYOrder; })
             .style('stroke', 'black')
             .style('fill-opacity', "0.4")
             .transition()
