@@ -48,14 +48,33 @@ define(function (require) {
 
         var ctx = bars.generateContext(data_histogram);
         bars.draw('#view1', ctx);
-        function repeat(ctx) {
-            b2s(ctx, map, data_1d, function (ctx) {
-                s2b(ctx, map, data_histogram, function (ctx) {
-                    repeat(ctx);
-                })
-            })
-        };
-        repeat(ctx);
+        var isB2s=true;
+        $('#btn_switch').click(function(){
+            var $this=$(this);
+            $this.attr("disabled", true);
+            if (isB2s) {
+                b2s(ctx, map, data_1d, function (_ctx) {
+                    ctx = _ctx;
+                    $this.attr("disabled", false);
+                    isB2s=false;
+                });
+            } else {
+                s2b(ctx, map, data_histogram, function (_ctx) {
+                    ctx=_ctx;
+                    $this.attr("disabled", false);
+                    isB2s=true;
+                });
+            }
+        });
+        
+        // function repeat(ctx) {
+        //     b2s(ctx, map, data_1d, function (ctx) {
+        //         s2b(ctx, map, data_histogram, function (ctx) {
+        //             repeat(ctx);
+        //         })
+        //     })
+        // };
+        // repeat(ctx);
     });
 
 });

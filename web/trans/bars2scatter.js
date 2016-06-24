@@ -1,7 +1,6 @@
 define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars) {
 
-    var TOTAL_DURATION = 1500,
-        INITIAL_DELAY = 200;
+    var TOTAL_DURATION = 1500;
 
     function processMap(mapScatterToBars, barsData, scatterData, isScatterToBar) {
         var map = JSON.parse(JSON.stringify(mapScatterToBars));
@@ -88,15 +87,17 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
         svg.selectAll('.bar').remove();
 
         var n=0;
+        var total=scatterData.length;
+
         tmpBlocks
             .transition()
-            .delay(INITIAL_DELAY)
+            // .delay(INITIAL_DELAY)
             .transition()
             .duration(tickDuration)
-            .delay(function (d) { return INITIAL_DELAY + mapByScatter[d.id].order * tickDuration; })
+            .delay(function (d) { return mapByScatter[d.id].order * tickDuration; })
             .attr("height", 0)
             .each(function() { ++n; })
-            .each('end', function(){
+            .each('end', function(dd,i){
                 var bar = d3.select(this),
                     d=bar.data()[0];
                 d3.select(this.parentNode)
@@ -107,7 +108,7 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
                     .attr('cx', bar.attr('x'))
                     .attr('cy', bar.attr('y'))
                     .transition()
-                    .duration(tickDuration)
+                    .duration(500)
                     .attr('cx', new_x(d.x))
                     .attr('cy', new_y(d.y))
                     .each('end', function () {
@@ -136,10 +137,9 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
         var tickDuration = TOTAL_DURATION / mapScatterToBars.length;
         d3.selectAll('.dot')
             .transition()
-            .delay(INITIAL_DELAY)
             .transition()
-            .duration(tickDuration)
-            .delay(function (d) { return INITIAL_DELAY + mapByFrom[d.id].order * tickDuration; })
+            .duration(500)
+            .delay(function (d) { return mapByFrom[d.id].order * tickDuration; })
             .attr('cy', function (d) { return new_y(mapByFrom[d.id].count); })
             .attr('cx', function (d) { return new_x(mapByFrom[d.id].bucket); })
             .attr('r',2)
