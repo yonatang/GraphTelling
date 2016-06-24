@@ -1,4 +1,4 @@
-define(['d3', '../../simpsons/web/scripts/utils', '../views/stacked-bars'], function (d3, utils, stackedBars) {
+define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, stackedBars) {
 
     var clone = utils.clone;
     var forEach = utils.forEach;

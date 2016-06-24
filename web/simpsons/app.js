@@ -4,10 +4,12 @@
 // except for 'app' ones, which are in a sibling
 // directory.
 requirejs.config({
-    baseUrl: 'scripts',
+    baseUrl: '.',
     paths: {
-        d3: 'lib/d3.min',
-        utils: 'utils'
+        d3: '../common/d3.min',
+        utils: '../common/utils',
+        'views/stacked-bars': '../views/stacked-bars',
+        'trans/sbars2sbars': '../trans/sbars2sbars'
     }
 });
 
