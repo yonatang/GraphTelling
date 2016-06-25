@@ -7,7 +7,10 @@ requirejs.config({
     baseUrl: '.',
     paths: {
         d3: '../common/d3.min',
+        'utils': '../common/utils',
         'trans/bars2scatter': '../trans/bars2scatter',
+
+        'views/absXYView': '../views/absXYView',
         'views/bars': '../views/bars',
         'views/scatter': '../views/scatter'
     }

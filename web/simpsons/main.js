@@ -1,8 +1,10 @@
-define(function (require) {
+define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3,StackedBars, sb2sb) {
 
-    var d3=require('d3');
-    var stackedBars = require('views/stacked-bars');
-    var sb2sb=require('trans/sbars2sbars');
+    var stackedBars=new StackedBars();
+    // var d3=require('d3');
+    // var stackedBars = new require('views/stacked-bars');
+    console.log(stackedBars);
+    // var sb2sb=require('trans/sbars2sbars');
 
     function jsons(files, callback) {
         var datas = [];
@@ -51,7 +53,7 @@ define(function (require) {
             step = 0;
 
         var ctx = stackedBars.generateContext(init_data);
-        stackedBars.draw('#view1', ctx);
+        stackedBars.draw(ctx, '#view1');
 
 
         function showStepMessage() {

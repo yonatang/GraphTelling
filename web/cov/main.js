@@ -2,9 +2,12 @@ define(function (require) {
 
     var d3=require('d3');
     var s2b_t = require('trans/bars2scatter');
-    var bars = require('views/bars'),
-        scatter = require('views/scatter');
+    var Bars = require('views/bars'),
+        Scatter = require('views/scatter');
 
+
+    var bars=new Bars(),
+        scatter=new Scatter();
     function jsons(files, callback) {
         var datas = [];
 
@@ -47,7 +50,7 @@ define(function (require) {
             s2b=s2b_t.s2b;
 
         var ctx = bars.generateContext(data_histogram);
-        bars.draw('#view1', ctx);
+        bars.draw(ctx, '#view1');
         var isB2s=true;
         $('#btn_switch').click(function(){
             var $this=$(this);

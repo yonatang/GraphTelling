@@ -1,4 +1,6 @@
-define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars) {
+define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils, Scatter, Bars) {
+    var scatter=new Scatter(),
+        bars=new Bars();
 
     var TOTAL_DURATION = 1500;
 
@@ -42,12 +44,10 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
         return {mapByScatter: mapByScatter, mapByBar: mapByBar, oldDataById: barsData, newDataById: newDataById};
     }
 
-    function getEndAnimationCallback(ctx, newView, callback, newCtx) {
+    function getEndAnimationCallback(ctx, oldView, newView, callback, newCtx) {
         return function endAnimationCb() {
-            d3.selectAll('.tmp').remove();
-            ctx.svg.selectAll('.x.axis').remove();
-            ctx.svg.selectAll('.y.axis').remove();
-            newView.draw('#view1', newCtx);
+            oldView.afterAnimation(ctx);
+            newView.draw(newCtx);
             if (callback) {
                 callback(newCtx);
             }
@@ -70,7 +70,16 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
         var new_y = new_ctx.scale.y,
             new_x = new_ctx.scale.x;
 
-        var endAnimationCb = getEndAnimationCallback(ctx,scatter,callback, new_ctx);
+        bars.prepareForAnimation(ctx);
+
+        if (!utils.equals(ctx.scale.x.domain(), new_ctx.scale.x.domain())) {
+            bars.hideXAxisTicks(ctx);
+        }
+        if (!utils.equals(ctx.scale.y.domain(), new_ctx.scale.y.domain())) {
+            bars.hideYAxisTicks(ctx);
+        }
+
+        var endAnimationCb = getEndAnimationCallback(ctx, bars, scatter,callback, new_ctx);
 
         var blockHeight = old_y(0) - old_y(1);
         var tickDuration = TOTAL_DURATION / mapScatterToBars.length;
@@ -130,7 +139,16 @@ define(['d3', '../views/scatter', '../views/bars'], function (d3, scatter, bars)
         var new_y = new_ctx.scale.y,
             new_x = new_ctx.scale.x;
 
-        var endAnimationCb = getEndAnimationCallback(ctx,bars,callback, new_ctx);
+        scatter.prepareForAnimation(ctx);
+
+        if (!utils.equals(ctx.scale.x.domain(), new_ctx.scale.x.domain())) {
+            scatter.hideXAxisTicks(ctx);
+        }
+        if (!utils.equals(ctx.scale.y.domain(), new_ctx.scale.y.domain())) {
+            scatter.hideYAxisTicks(ctx);
+        }
+
+        var endAnimationCb = getEndAnimationCallback(ctx,scatter, bars,callback, new_ctx);
 
         var blockHeight = new_y(0) - new_y(1);
         var n = 0;
