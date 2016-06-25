@@ -1,10 +1,4 @@
-define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3,StackedBars, sb2sb) {
-
-    var stackedBars=new StackedBars();
-    // var d3=require('d3');
-    // var stackedBars = new require('views/stacked-bars');
-    console.log(stackedBars);
-    // var sb2sb=require('trans/sbars2sbars');
+define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3, StackedBars, sb2sb) {
 
     function jsons(files, callback) {
         var datas = [];
@@ -52,8 +46,8 @@ define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3,StackedBar
         var init_data=data_graph1,
             step = 0;
 
-        var ctx = stackedBars.generateContext(init_data);
-        stackedBars.draw(ctx, '#view1');
+        var stackedBars = new StackedBars(init_data, '#view1');
+        stackedBars.draw();
 
 
         function showStepMessage() {
@@ -70,9 +64,9 @@ define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3,StackedBar
             $('#spn_message').text('Going from step ' + (step + 1) + ' to ' +
                 (mod(forward ? (step + 1) : (step - 1), 4) + 1));
 
-            function callback(_ctx) {
+            function callback(newStackBars) {
                 step = mod(forward ? (step + 1) : (step - 1), 4);
-                ctx = _ctx;
+                stackedBars = newStackBars;
 
                 $(".progress-button").attr("disabled", false);
                 showStepMessage()
@@ -123,9 +117,9 @@ define(['d3','views/stacked-bars', 'trans/sbars2sbars'], function (d3,StackedBar
                     break;
             }
             if (forward) {
-                sb2sb.transform(ctx, map, data, opts, callback);
+                sb2sb.transform(stackedBars, map, data, opts, callback);
             } else {
-                sb2sb.reverse(ctx, map, data, opts, callback);
+                sb2sb.reverse(stackedBars, map, data, opts, callback);
             }
         }
 

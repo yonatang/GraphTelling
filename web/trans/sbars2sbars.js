@@ -2,7 +2,6 @@ define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, StackedBars) 
 
     var clone = utils.clone;
     var forEach = utils.forEach;
-    var stackedBars = new StackedBars();
 
     function processMap(oldData, newData, mapBarsToBars) {
         var map = clone(mapBarsToBars);
@@ -88,39 +87,38 @@ define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, StackedBars) 
             mapByOldBar: mapByOldBar, mapByNewBar:mapByNewBar};
     }
 
-    function endAnimationCb(oldCtx, newCtx, callback) {
-        stackedBars.draw(newCtx);
+    function endAnimationCb(oldView, newView, callback) {
+        newView.draw();
         if (callback) {
-            callback(newCtx);
+            callback(newView);
         }
-        stackedBars.afterAnimation(oldCtx);
+        oldView.afterAnimation();
     }
 
-    function sb2sb(ctx, mapBarsToBars, newData, opts, callback) {
+    function sb2sb(oldView, mapBarsToBars, newData, opts, callback) {
         var defaults = {
             firstX: true,
             duration: 1000
         };
         var opts = $.extend({}, defaults, opts);
 
-        var oldData = ctx.data;
+        var oldData = oldView.ctx.data;
         var mapData = processMap(oldData, newData, mapBarsToBars);
         var mapByOldBar = mapData.mapByOldBar,
             mapByNewBar = mapData.mapByNewBar,
             transitElements = mapData.transitElements;
 
-        var new_ctx=stackedBars.generateContext(newData);
-        new_ctx.svg = ctx.svg;
+        var newView = new StackedBars(newData, oldView);
 
-        var svg = ctx.svg,
-            x = ctx.scale.x,
-            y = ctx.scale.y;
+        var svg = oldView.ctx.svg,
+            x = oldView.ctx.scale.x,
+            y = oldView.ctx.scale.y;
 
-        var new_x=new_ctx.scale.x,
-            new_y=new_ctx.scale.y;
+        var new_x = newView.ctx.scale.x,
+            new_y = newView.ctx.scale.y;
 
 
-        stackedBars.prepareForAnimation(ctx);
+        oldView.prepareForAnimation();
         
         var tmpBars= svg.selectAll("tmpBar")
           .data(transitElements)
@@ -146,11 +144,11 @@ define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, StackedBars) 
             .delay(500)
             .duration(opts.duration);
 
-        if (!utils.equals(ctx.scale.x.domain(), new_ctx.scale.x.domain())) {
-            stackedBars.hideXAxisTicks(ctx);
+        if (!utils.equals(oldView.ctx.scale.x.domain(), newView.ctx.scale.x.domain())) {
+            oldView.hideXAxisTicks();
         }
-        if (!utils.equals(ctx.scale.y.domain(), new_ctx.scale.y.domain())) {
-            stackedBars.hideYAxisTicks(ctx);
+        if (!utils.equals(oldView.ctx.scale.y.domain(), newView.ctx.scale.y.domain())) {
+            oldView.hideYAxisTicks();
         }
 
         function xAnim(anim) {
@@ -205,7 +203,7 @@ define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, StackedBars) 
             .each(function() { ++n; })
             .each('end', function(){
                 if (!--n){
-                    setTimeout(function(){endAnimationCb(ctx, new_ctx, callback);},200);
+                    setTimeout(function(){endAnimationCb(oldView, newView, callback);},200);
                 }
             });
 
@@ -219,8 +217,8 @@ define(['d3', 'utils', 'views/stacked-bars'], function (d3, utils, StackedBars) 
         });
         return rMap;
     }
-    function reverse(ctx, mapBarsToBars, newData, opts, callback){
-        sb2sb(ctx, reverseMap(mapBarsToBars), newData, opts, callback);
+    function reverse(oldView, mapBarsToBars, newData, opts, callback){
+        sb2sb(oldView, reverseMap(mapBarsToBars), newData, opts, callback);
     }
     return {
         transform: sb2sb,

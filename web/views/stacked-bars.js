@@ -1,7 +1,7 @@
-define(['d3', 'views/absXYView'], function(d3, AbsXYView){
-    var StackedBars = function(){
-        AbsXYView.call();
-    };
+define(['d3', 'views/absXYView'], function(d3, AbsXYView) {
+    function StackedBars(data, obj){
+        AbsXYView.call(this, data, obj);
+    }
     StackedBars.prototype = Object.create(AbsXYView.prototype);
     StackedBars.prototype.class = StackedBars;
     var _super=AbsXYView.prototype;
@@ -82,9 +82,11 @@ define(['d3', 'views/absXYView'], function(d3, AbsXYView){
         };
     };
 
-    StackedBars.prototype.drawData = function(ctx){
-        var x=ctx.scale.x,
-            y=ctx.scale.y;
+    StackedBars.prototype.drawData = function(){
+        var ctx = this.ctx,
+            x = ctx.scale.x,
+            y = ctx.scale.y;
+
         ctx.svg.selectAll(".bar")
             .data(ctx.data)
             .enter().append("rect")

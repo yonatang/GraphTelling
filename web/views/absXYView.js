@@ -1,7 +1,38 @@
 define(function(){
-    var AbsXYView = function(){
-    };
+    function AbsXYView(data, obj){
+        this.populateContext(data);
+        if (typeof obj == 'string'){
+            var selector=obj;
+            this.createSvg(selector);
+        } else {
+            var svg = obj.ctx.svg;
+            this.ctx.svg=svg;
+        }
+    }
+
     AbsXYView.prototype.class = AbsXYView;
+
+    AbsXYView.prototype.createSvg = function(selector) {
+        var ctx = this.ctx,
+            width = ctx.dimension.width,
+            height = ctx.dimension.height,
+            margin = ctx.dimension.margin;
+
+        ctx.svg=d3.select(selector).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    };
+
+    AbsXYView.prototype.populateContext = function populateContext(data) {
+        var ctx = {};
+        this.ctx = ctx;
+        ctx.data = data;
+        ctx.dimension = this.getDimension();
+        ctx.scale = this.getScale(ctx.data, ctx.dimension);
+        ctx.axis = this.getAxises(ctx.scale);
+    };
     
     AbsXYView.prototype.generateContext = function(data){
         var ctx = {};
@@ -49,57 +80,51 @@ define(function(){
         throw Error("Not implemented")
     };
 
-    AbsXYView.prototype.draw = function(ctx, selector){
-        var width=ctx.dimension.width,
-            height=ctx.dimension.height,
-            margin=ctx.dimension.margin;
-        
-        if (!ctx.svg) {
-            if (!selector){
-                throw Error("selector need to be defined");
-            }
-            ctx.svg = d3.select(selector).append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        }
+    AbsXYView.prototype.draw = function(){
+        var ctx = this.ctx;
+
         this.drawXAxis(ctx);
         this.drawYAxis(ctx);
         this.drawData(ctx);
     };
 
-    AbsXYView.prototype.drawXAxis = function(ctx){
+    AbsXYView.prototype.drawXAxis = function(){
+        var ctx=this.ctx;
         ctx.svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + ctx.dimension.height + ")")
             .call(ctx.axis.xAxis);
     };
 
-    AbsXYView.prototype.drawYAxis = function(ctx){
+    AbsXYView.prototype.drawYAxis = function(){
+        var ctx=this.ctx;
         ctx.svg.append("g")
             .attr("class", "y axis")
             .call(ctx.axis.yAxis);
 
     };
 
-    AbsXYView.prototype.drawData = function(ctx){
+    AbsXYView.prototype.drawData = function(){
         throw Error("Not implemented");
     };
 
-    AbsXYView.prototype.hideXAxisTicks = function(ctx){
+    AbsXYView.prototype.hideXAxisTicks = function(){
+        var ctx=this.ctx;
         ctx.svg.selectAll('.x.axis .tick').remove();
     };
 
-    AbsXYView.prototype.hideYAxisTicks = function(ctx){
+    AbsXYView.prototype.hideYAxisTicks = function(){
+        var ctx=this.ctx;
         ctx.svg.selectAll('.y.axis .tick').remove();
     };
 
-    AbsXYView.prototype.prepareForAnimation = function(ctx){
+    AbsXYView.prototype.prepareForAnimation = function(){
+        var ctx=this.ctx;
         ctx.svg.selectAll('*').classed('tmp',true);
     };
 
-    AbsXYView.prototype.afterAnimation = function(ctx) {
+    AbsXYView.prototype.afterAnimation = function() {
+        var ctx=this.ctx;
         ctx.svg.selectAll('.tmp').remove();
     };
 
