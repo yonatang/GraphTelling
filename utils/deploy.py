@@ -1,8 +1,10 @@
 # http://me.yonatan.graphtelling.demo.s3-website-us-east-1.amazonaws.com
 import os
 from types import NoneType
-
+from datetime import datetime
+from datetime import tzinfo
 import boto3
+import subprocess
 
 bucket = "me.yonatan.graphtelling.demo"
 root_dir = '/Users/yonatan/Git/Private/GraphTelling/web'
@@ -32,7 +34,7 @@ def is_blacklisted(relative_path):
             return True
     return False
 
-
+now_str = datetime.utcnow().isoformat('-') + 'Z'
 for subdir, dirs, files in os.walk(root_dir):
     for file_name in files:
         relative_path = get_relative_path(subdir, file_name)
@@ -56,9 +58,14 @@ for subdir, dirs, files in os.walk(root_dir):
             contentType = 'application/binary'
             acl = 'private'
 
-        print relative_path
         if relative_path in cachelist:
             cache_control = 'max-age=3600'
+
+        if relative_path == 'index.html':
+            data = data.read().replace('\n', '')
+            data = data.replace('@DATE@', now_str)
+            git_commit = subprocess.check_output(["git", "describe", '--always'])
+            data = data.replace('@COMMIT_ID@', git_commit)
 
         s3.Bucket(bucket).put_object(Key=relative_path, Body=data, ACL=acl,
                                      CacheControl=cache_control,
