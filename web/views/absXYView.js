@@ -7,9 +7,7 @@ define(function(){
         var ctx = {};
         ctx.data = data;
         ctx.dimension = this.getDimension();
-        console.log('dimension', ctx.dimension);
         ctx.scale = this.getScale(ctx.data, ctx.dimension);
-        console.log('scale', ctx.scale);
         ctx.axis = this.getAxises(ctx.scale);
         return ctx;
     };
@@ -26,19 +24,25 @@ define(function(){
         };
     };
 
-    AbsXYView.prototype.getAxises = function(scale){
-        var xAxis = d3.svg.axis()
-            .scale(scale.x)
-            .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-            .scale(scale.y)
-            .orient("left");
-
+    AbsXYView.prototype.getAxises = function (scale) {
+        var xAxis = this.getXAxis(scale.x),
+            yAxis = this.getYAxis(scale.y);
         return {
             xAxis: xAxis,
             yAxis: yAxis
         };
+    };
+
+    AbsXYView.prototype.getXAxis = function (scaleX) {
+        return d3.svg.axis()
+            .scale(scaleX)
+            .orient("bottom");
+    };
+
+    AbsXYView.prototype.getYAxis = function (scaleY) {
+        return d3.svg.axis()
+            .scale(scaleY)
+            .orient("left");
     };
 
     AbsXYView.prototype.getScale = function(data, dimension){

@@ -6,19 +6,76 @@ define(['d3', 'views/absXYView'], function(d3, AbsXYView){
     StackedBars.prototype.class = StackedBars;
     var _super=AbsXYView.prototype;
 
+    var getGroups = function(data) {
+        var groups=d3.set();
+        data.forEach(function (d) {
+            groups.add(d.group || 0);
+        });
+        return groups.values();
+    };
+
+    StackedBars.prototype.getXAxis = function(scaleX){
+        if (scaleX.domain().length>2){
+            //probaby grouped. TODO!!! need more context here.
+            var ranges=scaleX.range();
+            var axisScale = d3.scale.ordinal();
+            axisScale.domain(scaleX.domain());
+
+            var newRanges=ranges.map(function (d,i) { if (i==0||i==ranges.length-1) return d; return d + scaleX.rangeBand()/2; });
+            axisScale.range(newRanges);
+            return _super.getXAxis(axisScale);
+        } else {
+            return _super.getXAxis(scaleX);
+        }
+    };
     StackedBars.prototype.getScale = function(data, dimension){
-        var x = d3.scale.ordinal();//.range([0, width]).rangePoints([0, width],1);
+
+        var groupedFactor=0.8;
+        var x;
         var y = d3.scale.linear().range([dimension.height, 0]);
 
         var xOrder = {};
+        var xToGroup={};
+        var groups=getGroups(data);
         data.forEach(function (d) {
             xOrder[d.x] = d.xOrder;
+            xToGroup[d.x] = d.group || 0;
         });
 
         y.domain([d3.min(data.sort(), function (d) { return d.y0; }), d3.max(data, function (d) { return d.y1; })]);
 
-        x.domain(data.map(function (d) { return d.x; }).sort(function(a,b){return xOrder[a]-xOrder[b]}))
-            .rangeBands([0,dimension.width],0.1);
+        var xVals=d3.set(data.map(function (d) { return d.x; })).values().sort(function(a,b){return xOrder[a]-xOrder[b]});
+
+        var tmpX = d3.scale.ordinal();
+        tmpX.domain(xVals)
+            .rangeBands([0, dimension.width], 0.1);
+
+        if (groups.length>1) {
+            // This is grouped data set. Hack it to group values together.
+            x = d3.scale.ordinal();
+            var newXVals = [' '].concat(xVals).concat('  ');
+
+            var groupArray = [];
+            xVals.forEach(function (xVal) {
+                groupArray.push(xToGroup[xVal]);
+            });
+            var domain = tmpX.domain();
+            var range = tmpX.range();
+            var firstColumn = range[0];
+            var rangeBand = tmpX.rangeBand() * groupedFactor;
+
+            range = range.map(function (d, i) {
+                return d * groupedFactor + dimension.width * ((1 - groupedFactor) / 8) * groupArray[i] + rangeBand / 2;
+            });
+
+            x.domain([' '].concat(domain).concat(['  ']));
+            x.range([0].concat(range).concat(dimension.width));
+            x.rangeBand = function () { return rangeBand };
+        } else {
+            // There's only a single group. No need to hack anything.
+            x=tmpX;
+        }
+
         return {
             x: x,
             y: y
