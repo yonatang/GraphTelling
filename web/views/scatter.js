@@ -1,6 +1,6 @@
 define(['d3', 'views/absXYView'], function(d3, AbsXYView) {
-    var Scatter = function () {
-        AbsXYView.call();
+    var Scatter = function (data, obj) {
+        AbsXYView.call(this, data, obj);
     };
     Scatter.prototype = Object.create(AbsXYView.prototype);
     Scatter.prototype.class = Scatter;
@@ -32,8 +32,9 @@ define(['d3', 'views/absXYView'], function(d3, AbsXYView) {
         };
     };
 
-    Scatter.prototype.drawData = function (ctx) {
-        var x = ctx.scale.x,
+    Scatter.prototype.drawData = function () {
+        var ctx = this.ctx,
+            x = ctx.scale.x,
             y = ctx.scale.y;
 
         ctx.svg.selectAll(".dot")

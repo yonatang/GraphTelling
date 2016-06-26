@@ -6,8 +6,6 @@ define(function (require) {
         Scatter = require('views/scatter');
 
 
-    var bars=new Bars(),
-        scatter=new Scatter();
     function jsons(files, callback) {
         var datas = [];
 
@@ -49,35 +47,28 @@ define(function (require) {
         var b2s=s2b_t.b2s,
             s2b=s2b_t.s2b;
 
-        var ctx = bars.generateContext(data_histogram);
-        bars.draw(ctx, '#view1');
-        var isB2s=true;
-        $('#btn_switch').click(function(){
-            var $this=$(this);
+        var bars = new Bars(data_histogram, '#view1'),
+            scatter = null;
+        bars.draw();
+
+        $('#btn_switch').click(function () {
+            var $this = $(this);
             $this.attr("disabled", true);
-            if (isB2s) {
-                b2s(ctx, map, data_1d, function (_ctx) {
-                    ctx = _ctx;
+            if (bars) {
+                b2s(bars, map, data_1d, function (_scatter) {
+                    scatter = _scatter;
+                    bars = null;
                     $this.attr("disabled", false);
-                    isB2s=false;
                 });
             } else {
-                s2b(ctx, map, data_histogram, function (_ctx) {
-                    ctx=_ctx;
+                s2b(scatter, map, data_histogram, function (_bars) {
+                    bars = _bars;
+                    scatter = null;
                     $this.attr("disabled", false);
-                    isB2s=true;
                 });
             }
         });
-        
-        // function repeat(ctx) {
-        //     b2s(ctx, map, data_1d, function (ctx) {
-        //         s2b(ctx, map, data_histogram, function (ctx) {
-        //             repeat(ctx);
-        //         })
-        //     })
-        // };
-        // repeat(ctx);
+
     });
 
 });
