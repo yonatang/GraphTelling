@@ -9,6 +9,7 @@ requirejs.config({
         d3: '../common/d3.min',
         'utils': '../common/utils',
         'trans/bars2scatter': '../trans/bars2scatter',
+        'trans/absTrans': '../trans/absTrans',
 
         'views/absXYView': '../views/absXYView',
         'views/bars': '../views/bars',

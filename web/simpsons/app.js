@@ -10,7 +10,8 @@ requirejs.config({
         utils: '../common/utils',
         'views/absXYView': '../views/absXYView',
         'views/stacked-bars': '../views/stacked-bars',
-        'trans/sbars2sbars': '../trans/sbars2sbars'
+        'trans/sbars2sbars': '../trans/sbars2sbars',
+        'trans/absTrans': '../trans/absTrans'
     }
 });
 

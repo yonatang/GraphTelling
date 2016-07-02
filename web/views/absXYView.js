@@ -2,11 +2,9 @@ define(function(){
     function AbsXYView(data, obj){
         this.populateContext(data);
         if (typeof obj == 'string'){
-            var selector=obj;
-            this.createSvg(selector);
+            this.createSvg(obj);
         } else {
-            var svg = obj.ctx.svg;
-            this.ctx.svg=svg;
+            this.ctx.svg = obj.ctx.svg;
         }
     }
 
@@ -34,14 +32,6 @@ define(function(){
         ctx.axis = this.getAxises(ctx.scale);
     };
     
-    AbsXYView.prototype.generateContext = function(data){
-        var ctx = {};
-        ctx.data = data;
-        ctx.dimension = this.getDimension();
-        ctx.scale = this.getScale(ctx.data, ctx.dimension);
-        ctx.axis = this.getAxises(ctx.scale);
-        return ctx;
-    };
 
 
     AbsXYView.prototype.getDimension = function(){

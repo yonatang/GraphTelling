@@ -1,9 +1,22 @@
-define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils, Scatter, Bars) {
+define(['trans/absTrans', '../views/scatter', '../views/bars'], function (AbsTrans, Scatter, Bars) {
+    function Bars2Scatter() {
+        AbsTrans.call(this, Bars, Scatter);
+    };
+    Bars2Scatter.prototype = Object.create(AbsTrans.prototype);
+    Bars2Scatter.prototype.class = Bars2Scatter;
+    var _super = AbsTrans.prototype;
 
     var TOTAL_DURATION = 1500;
 
-    function processMap(mapScatterToBars, barsData, scatterData, isScatterToBar) {
-        var map = JSON.parse(JSON.stringify(mapScatterToBars));
+    Bars2Scatter.prototype.processMap = function (aData, bData, mapData) {
+        // mapData: scatter -> bars
+        // aData: barsData
+        // bData: Scatter
+
+        var barsData = aData,
+            scatterData = bData;
+
+        var map = JSON.parse(JSON.stringify(mapData));
         var mapByScatter = {},
             mapByBar = {},
             dataById = {},
@@ -32,34 +45,37 @@ define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils
                 return m1.bucket - m2.bucket;
             }
             if (m1.count != m2.count) {
-                return isScatterToBar ? m1.count - m2.count : m2.count - m1.count;
+                return m1.count - m2.count;
             }
             return 0;
         });
         map_array.forEach(function (m, i) {
-            m.order = i;
+            m.orderBtoS = i;
+            m.orderStoB = map_array.length - i - 1;
         });
-        return {mapByScatter: mapByScatter, mapByBar: mapByBar, oldDataById: barsData, newDataById: newDataById};
-    }
+        return {mapByScatter: mapByScatter, mapByBar: mapByBar, oldDataById: barsData, newDataById: newDataById,
+            mapData: mapData};
+    };
 
-    function getEndAnimationCallback(oldView, newView, callback) {
-        return function endAnimationCb() {
-            oldView.afterAnimation();
-            newView.draw();
-            if (callback) {
-                callback(newView);
-            }
-        }
-    }
+    Bars2Scatter.prototype.transformAtoB = function (oldView, mapCtx, newView, options, callback) {
+        return barsToScatter.apply(this, [oldView, mapCtx, newView, options, callback]);
+    };
 
-    function b2s(oldView, mapScatterToBars, scatterData, callback) {
-        var ctx = oldView.ctx,
-            mapByScatter = processMap(mapScatterToBars, ctx.data, scatterData, false).mapByScatter;
-        var newView = new Scatter(scatterData, oldView),
-            new_ctx = newView.ctx;
+    Bars2Scatter.prototype.transformBtoA = function (oldView, mapCtx, newView, options, callback) {
+        return scatterToBars.apply(this, [oldView, mapCtx, newView, options, callback]);
+    };
+
+    var barsToScatter = function(barsView, mapCtx, scatterView, options, callback) {
+        var utils = this.utils,
+            d3 = this.d3;
+
+        var ctx = barsView.ctx,
+            mapByScatter = mapCtx.mapByScatter,
+            new_ctx = scatterView.ctx,
+            scatterData = scatterView.ctx.data;
 
         new_ctx.svg = ctx.svg;
-        var svg=ctx.svg;
+        var svg = ctx.svg;
 
         var width = ctx.dimension.width,
             height = ctx.dimension.height;
@@ -70,50 +86,48 @@ define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils
         var new_y = new_ctx.scale.y,
             new_x = new_ctx.scale.x;
 
-        oldView.prepareForAnimation();
+        barsView.prepareForAnimation();
 
         if (!utils.equals(ctx.scale.x.domain(), new_ctx.scale.x.domain())) {
-            oldView.hideXAxisTicks();
+            barsView.hideXAxisTicks();
         }
         if (!utils.equals(ctx.scale.y.domain(), new_ctx.scale.y.domain())) {
-            oldView.hideYAxisTicks();
+            barsView.hideYAxisTicks();
         }
-
-        var endAnimationCb = getEndAnimationCallback(oldView, newView, callback);
-
+        
         var blockHeight = old_y(0) - old_y(1);
-        var tickDuration = TOTAL_DURATION / mapScatterToBars.length;
-        var tmpBlocks=svg.selectAll('.tmpBlock')
+        var tickDuration = TOTAL_DURATION / mapCtx.mapData.length;
+        var tmpBlocks = svg.selectAll('.tmpBlock')
             .data(scatterData)
             .enter()
             .append('rect')
             .attr('class', 'tmp')
             .style('fill', 'steelblue')
-            .attr('y',function(d) { return old_y(mapByScatter[d.id].count + 1); })
-            .attr('x',function(d) { return old_x(mapByScatter[d.id].bucket); })
+            .attr('y', function (d) { return old_y(mapByScatter[d.id].count + 1); })
+            .attr('x', function (d) { return old_x(mapByScatter[d.id].bucket); })
             .attr('height', blockHeight)
             .attr('width', 5);
         svg.selectAll('.bar').remove();
 
-        var n=0;
-        var total=scatterData.length;
+        var n = 0;
+        var total = scatterData.length;
 
         tmpBlocks
             .transition()
             // .delay(INITIAL_DELAY)
             .transition()
             .duration(tickDuration)
-            .delay(function (d) { return mapByScatter[d.id].order * tickDuration; })
+            .delay(function (d) { return mapByScatter[d.id].orderBtoS * tickDuration; })
             .attr("height", 0)
-            .each(function() { ++n; })
-            .each('end', function(dd,i){
+            .each(function () { ++n; })
+            .each('end', function (dd, i) {
                 var bar = d3.select(this),
-                    d=bar.data()[0];
+                    d = bar.data()[0];
                 d3.select(this.parentNode)
                     .append('circle')
-                    .attr('class','tmp circle')
+                    .attr('class', 'tmp circle')
                     .style('fill', 'steelblue')
-                    .attr('r',2)
+                    .attr('r', 2)
                     .attr('cx', bar.attr('x'))
                     .attr('cy', bar.attr('y'))
                     .transition()
@@ -121,18 +135,20 @@ define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils
                     .attr('cx', new_x(d.x))
                     .attr('cy', new_y(d.y))
                     .each('end', function () {
-                        if (!--n) endAnimationCb.apply(this);
+                        if (!--n) callback.apply(this, [scatterView]);
                         bar.remove();
                     });
             });
-        return newView;
-    }
+        return scatterView;
+    };
 
-    function s2b (oldView, mapScatterToBars, barsData, callback) {
-        var ctx = oldView.ctx,
-            mapByFrom = processMap(mapScatterToBars, barsData, ctx.data, true).mapByScatter;
-        var newView = new Bars(barsData, oldView),
-            new_ctx = newView.ctx;
+    function scatterToBars (scatterView, mapCtx, barsView, options, callback){
+        var utils = this.utils,
+            d3 = this.d3;
+
+        var ctx = scatterView.ctx,
+            mapByFrom = mapCtx.mapByScatter,
+            new_ctx = barsView.ctx;
 
         var width = ctx.dimension.width,
             height = ctx.dimension.height;
@@ -140,25 +156,23 @@ define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils
         var new_y = new_ctx.scale.y,
             new_x = new_ctx.scale.x;
 
-        newView.prepareForAnimation(ctx);
+        scatterView.prepareForAnimation();
 
         if (!utils.equals(ctx.scale.x.domain(), new_ctx.scale.x.domain())) {
-            newView.hideXAxisTicks(ctx);
+            barsView.hideXAxisTicks();
         }
         if (!utils.equals(ctx.scale.y.domain(), new_ctx.scale.y.domain())) {
-            newView.hideYAxisTicks(ctx);
+            barsView.hideYAxisTicks();
         }
-
-        var endAnimationCb = getEndAnimationCallback(oldView, newView, callback);
 
         var blockHeight = new_y(0) - new_y(1);
         var n = 0;
-        var tickDuration = TOTAL_DURATION / mapScatterToBars.length;
+        var tickDuration = TOTAL_DURATION / mapCtx.mapData.length;
         d3.selectAll('.dot')
             .transition()
             .transition()
             .duration(500)
-            .delay(function (d) { return mapByFrom[d.id].order * tickDuration; })
+            .delay(function (d) { return mapByFrom[d.id].orderStoB * tickDuration; })
             .attr('cy', function (d) { return new_y(mapByFrom[d.id].count); })
             .attr('cx', function (d) { return new_x(mapByFrom[d.id].bucket); })
             .attr('r',2)
@@ -180,12 +194,12 @@ define(['d3', 'utils', '../views/scatter', '../views/bars'], function (d3, utils
                     .attr("height", blockHeight)
                     .attr("y", dot.attr('cy') - blockHeight)
                     .each('end', function () {
-                        if (!--n) endAnimationCb.apply(this);
+                        if (!--n) callback.apply(this, [barsView]);
                         dot.remove();
                     });
             });
-        return newView;
+        return barsView;
     }
+    return new Bars2Scatter();
 
-    return { b2s: b2s, s2b:s2b}
 });

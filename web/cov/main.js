@@ -1,7 +1,7 @@
 define(function (require) {
 
     var d3=require('d3');
-    var s2b_t = require('trans/bars2scatter');
+    var s2b = require('trans/bars2scatter');
     var Bars = require('views/bars'),
         Scatter = require('views/scatter');
 
@@ -44,9 +44,6 @@ define(function (require) {
             map = datas[1],
             data_histogram = datas[2];
 
-        var b2s=s2b_t.b2s,
-            s2b=s2b_t.s2b;
-
         var bars = new Bars(data_histogram, '#view1'),
             scatter = null;
         bars.draw();
@@ -55,14 +52,14 @@ define(function (require) {
             var $this = $(this);
             $this.attr("disabled", true);
             if (bars) {
-                b2s(bars, map, data_1d, function (_scatter) {
-                    scatter = _scatter;
+                s2b.transform(bars, map, data_1d, {}, function (newView) {
+                    scatter = newView;
                     bars = null;
                     $this.attr("disabled", false);
                 });
             } else {
-                s2b(scatter, map, data_histogram, function (_bars) {
-                    bars = _bars;
+                s2b.transform(scatter, map, data_histogram, {}, function (newView) {
+                    bars = newView;
                     scatter = null;
                     $this.attr("disabled", false);
                 });
