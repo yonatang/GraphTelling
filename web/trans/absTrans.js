@@ -6,6 +6,8 @@ define(['d3', 'utils'], function (d3, utils) {
         this.toClass=toClass;
     }
     AbsTrans.prototype.class = AbsTrans;
+    AbsTrans.prototype.defaults = {};
+
     AbsTrans.prototype.isAtoBTransform = function(view){
         return (view instanceof this.fromClass);
     };
@@ -19,22 +21,23 @@ define(['d3', 'utils'], function (d3, utils) {
     };
 
     AbsTrans.prototype.transform = function (oldView, mapData, newData, options, callback) {
+        var opts = $.extend({}, this.defaults, options);
         var oldData=oldView.ctx.data;
         var mapCtx, //= this.processMap(oldData, newData, mapData);
             action,
             newView;
         if (this.isAtoBTransform(oldView)){
             action=this.transformAtoB;
-            newView = this.instantiateB(oldView, newData, options);
+            newView = this.instantiateB(oldView, newData, opts);
             mapCtx = this.processMap(oldData, newData, mapData);
         } else {
             action=this.transformBtoA;
-            newView = this.instantiateA(oldView, newData, options);
+            newView = this.instantiateA(oldView, newData, opts);
             mapCtx = this.processMap(newData, oldData, mapData);
 
         }
         var _callback = this.generateCallback(oldView, callback);
-        return action.apply(this, [oldView, mapCtx, newView, options, _callback]);
+        return action.apply(this, [oldView, mapCtx, newView, opts, _callback]);
     };
 
     AbsTrans.prototype.generateCallback = function(oldView, userCallback) {

@@ -44,24 +44,33 @@ define(function (require) {
             map = datas[1],
             data_histogram = datas[2];
 
-        var bars = new Bars(data_histogram, '#view1'),
-            scatter = null;
-        bars.draw();
+        var bars = null,
+            scatter = new Scatter(data_1d, '#view1');
+        scatter.draw();
 
         $('#btn_switch').click(function () {
             var $this = $(this);
+            var $types = $('input[name="type"]'),
+                $typeChecked=$('input[name="type"]:checked');
+
+            var type=$typeChecked.val();
+
+            $types.attr('disabled',true);
             $this.attr("disabled", true);
             if (bars) {
-                s2b.transform(bars, map, data_1d, {}, function (newView) {
+                s2b.transform(bars, map, data_1d, {"type":type}, function (newView) {
                     scatter = newView;
                     bars = null;
                     $this.attr("disabled", false);
+                    $types.attr('disabled',false);
+
                 });
             } else {
-                s2b.transform(scatter, map, data_histogram, {}, function (newView) {
+                s2b.transform(scatter, map, data_histogram, {"type":type}, function (newView) {
                     bars = newView;
                     scatter = null;
                     $this.attr("disabled", false);
+                    $types.attr('disabled',false);
                 });
             }
         });
