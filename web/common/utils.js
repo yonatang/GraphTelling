@@ -1,4 +1,4 @@
-define(function () {
+define(["d3"],function (d3) {
     return {
         clone: function (o) {
             return JSON.parse(JSON.stringify(o));
@@ -48,6 +48,34 @@ define(function () {
             }
 
 
+        },
+        jsons: function(files, callback) {
+            var datas = [];
+            var done = false;
+            var n=0;
+            function _callback(i) {
+                return function (err, data) {
+                    n++;
+                    if (err) {
+                        if (!done) {
+                            done = true;
+                            return callback(err);
+                        }
+                        return;
+                    }
+                    if (!!data) {
+                        datas[i]=data;
+                    }
+                    if (n == files.length) {
+                        if (!done) {
+                            return callback(null, datas);
+                        }
+                    }
+                }
+            }
+            files.forEach(function(file,i){
+                d3.json(file, _callback(i));
+            });
         }
     }
 });

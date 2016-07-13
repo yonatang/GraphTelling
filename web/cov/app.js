@@ -11,6 +11,7 @@ requirejs.config({
         'trans/bars2scatter': '../trans/bars2scatter',
         'trans/absTrans': '../trans/absTrans',
 
+        'views/absView': '../views/absView',
         'views/absXYView': '../views/absXYView',
         'views/bars': '../views/bars',
         'views/scatter': '../views/scatter'

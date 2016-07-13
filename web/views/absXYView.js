@@ -1,29 +1,14 @@
-define(function(){
+define(['views/absView'],function(AbsView){
     function AbsXYView(data, obj){
-        this.populateContext(data);
-        if (typeof obj == 'string'){
-            this.createSvg(obj);
-        } else {
-            this.ctx.svg = obj.ctx.svg;
-        }
+        AbsView.call(this, data, obj);
     }
-
+    
+    AbsXYView.prototype = Object.create(AbsView.prototype);
+    var _super = AbsView.prototype;
     AbsXYView.prototype.class = AbsXYView;
 
-    AbsXYView.prototype.createSvg = function(selector) {
-        var ctx = this.ctx,
-            width = ctx.dimension.width,
-            height = ctx.dimension.height,
-            margin = ctx.dimension.margin;
-
-        ctx.svg=d3.select(selector).append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    };
-
     AbsXYView.prototype.populateContext = function populateContext(data) {
+        _super.populateContext(data);
         var ctx = {};
         this.ctx = ctx;
         ctx.data = data;
@@ -32,19 +17,6 @@ define(function(){
         ctx.axis = this.getAxises(ctx.scale);
     };
     
-
-
-    AbsXYView.prototype.getDimension = function(){
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-        return {
-            width: width,
-            height: height,
-            margin:margin
-        };
-    };
-
     AbsXYView.prototype.getAxises = function (scale) {
         var xAxis = this.getXAxis(scale.x),
             yAxis = this.getYAxis(scale.y);
@@ -72,7 +44,6 @@ define(function(){
 
     AbsXYView.prototype.draw = function(){
         var ctx = this.ctx;
-
         this.drawXAxis(ctx);
         this.drawYAxis(ctx);
         this.drawData(ctx);
@@ -106,16 +77,6 @@ define(function(){
     AbsXYView.prototype.hideYAxisTicks = function(){
         var ctx=this.ctx;
         ctx.svg.selectAll('.y.axis .tick').remove();
-    };
-
-    AbsXYView.prototype.prepareForAnimation = function(){
-        var ctx=this.ctx;
-        ctx.svg.selectAll('*').classed('tmp',true);
-    };
-
-    AbsXYView.prototype.afterAnimation = function() {
-        var ctx=this.ctx;
-        ctx.svg.selectAll('.tmp').remove();
     };
 
     return AbsXYView;
