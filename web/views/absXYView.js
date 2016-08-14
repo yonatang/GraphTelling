@@ -65,6 +65,16 @@ define(['views/absView'],function(AbsView){
 
     };
 
+    AbsXYView.prototype.removeYAxis = function(){
+        var ctx=this.ctx;
+        ctx.svg.selectAll('.y.axis').remove();
+    };
+
+    AbsXYView.prototype.removeXAxis = function(){
+        var ctx=this.ctx;
+        ctx.svg.selectAll('.x.axis').remove();
+    };
+
     AbsXYView.prototype.drawData = function(){
         throw Error("Not implemented");
     };

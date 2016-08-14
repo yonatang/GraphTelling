@@ -1,0 +1,10 @@
+[
+  {"id": "1", "age":"<5", "population":2704659, "color":"#98abc5"},
+  {"id": "2", "age":"5-13", "population":4499890, "color":"#8a89a5"},
+  {"id": "3", "age":"14-17", "population":2159981, "color": "#7b6888"},
+  {"id": "4", "age":"18-24", "population":3853788, "color": "#6b486b"},
+  {"id": "5", "age":"18-24", "population":3853788, "color": "#a05d56"},
+  {"id": "6", "age":"15-44", "population":14106543, "color": "#d0743c"},
+  {"id": "7", "age":"45-64", "population":8819342, "color": "#ff8c00"},
+  {"id": "8", "age":"≥65", "population":612463, "color": "#98abc5"}
+]
